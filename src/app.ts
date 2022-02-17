@@ -1,23 +1,34 @@
 import express from "express";
 import cors from "cors";
-import Plots from "./models/Plot";
+import globalErrorHandler from "./handler/globalErrorHandler";
+import { fallback } from "./controller/fallback";
+import apiRouter from "./routes/apiRouter";
+import compression from "compression";
+import multer from "multer";
 
 const app = express();
 
-app.use(express.json());
 app.use(cors());
+/** enable cors for pre-flight requests */
+app.options("*", cors());
 
-app.route("/api").get(async (req, res) => {
-  // const plot = new Plots({
-  //   title: "test",
-  //   description: "test description",
-  //   landmark: "10km test",
-  // });
-  // await plot.save();
+app.use(express.json({ limit: "10kb" }));
+//for form submissions
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: "10kb",
+  })
+);
+//accept form data fields
+app.use(multer().any());
+app.use(compression());
+//heroku https support
+app.enable("trust proxy");
 
-  res.status(200).json({
-    message: "Hello world",
-  });
-});
+app.use("/api", apiRouter);
+//fallback route
+app.use("*", fallback);
 
+app.use(globalErrorHandler);
 export default app;

@@ -1,5 +1,9 @@
 import { model, Schema } from "mongoose";
-
+interface IPlot {
+  title: string;
+  landmark: string;
+  description: string;
+}
 const PlotSchema = new Schema({
   title: {
     type: String,
@@ -15,5 +19,5 @@ const PlotSchema = new Schema({
   },
 });
 
-const Plots = model("Plots", PlotSchema);
+const Plots = model<IPlot>("Plots", PlotSchema);
 export default Plots;
