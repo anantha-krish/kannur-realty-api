@@ -4,14 +4,17 @@ import globalErrorHandler from "./handler/globalErrorHandler";
 import { fallback } from "./controller/fallback";
 import apiRouter from "./routes/apiRouter";
 import compression from "compression";
-import multer from "multer";
-import path from "path";
+import serveIndex from "serve-index";
 const app = express();
 
 app.use(cors());
 /** enable cors for pre-flight requests */
 app.options("*", cors());
-app.use(express.static(`${__dirname}/../public`));
+app.use(
+  "/public",
+  express.static(`${__dirname}/../public`),
+  serveIndex(`${__dirname}/../public`, { icons: true })
+);
 
 app.use(express.json({ limit: "10kb" }));
 //for form submissions

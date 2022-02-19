@@ -1,10 +1,10 @@
 import Plots, { IPlot } from "../models/plot";
 import { IApiController, IApiResponse, IMessageResponse } from "../types";
 import mongoose from "mongoose";
-import { readFile, readFileSync } from "fs";
 import multer from "multer";
-import { nextTick } from "process";
 import sharp from "sharp";
+import { rm } from "fs";
+import path from "path";
 
 // use buffer before storing to disk
 const multerStorage = multer.memoryStorage();
@@ -50,16 +50,6 @@ export const getPlots: IApiController = async (__req, res) => {
   res.status(200).json(response);
 };
 
-export const getPlotGallery: IApiController = async (__req, res) => {
-  const plot = await Plots.find().select("image");
-
-  // const response: IApiResponse = {
-  //   status: "success",
-  //   result: plots,
-  // };
-  res.status(200).json(plot);
-};
-
 export const getPlotById: IApiController = async (req, res, next) => {
   const id = req.params.id.toString();
   const isValidId = mongoose.isValidObjectId(id);
@@ -92,7 +82,32 @@ export const addPlot: IApiController = async (req, res) => {
   res.status(201).json(response);
 };
 
-export const deletePlotById: IApiController = async (req, res) => {
+const deleteFile = async (fileName: string) => {
+  const folder = "../../public/";
+  //remove original
+  await rm(
+    path.resolve(__dirname, folder, "images/", fileName),
+    { force: true },
+    (err) => {
+      if (err) throw err;
+    }
+  );
+  //remove thumbnail
+  await rm(
+    path.resolve(__dirname, folder, "thumbnail/", fileName),
+    { force: true },
+    (err) => {
+      if (err) throw err;
+    }
+  );
+};
+export const deleteImageByName: IApiController = async (req, res, next) => {
+  const fileName = req.params.fileName;
+  deleteFile(fileName).catch(next);
+  res.status(204).json({});
+};
+
+export const deletePlotById: IApiController = async (req, res, next) => {
   const id = req.params.id.toString();
   const isValidId = mongoose.isValidObjectId(id);
   let plot;
@@ -105,6 +120,8 @@ export const deletePlotById: IApiController = async (req, res) => {
     res.status(404).json(response);
   } else if (isValidId) {
     await Plots.findByIdAndDelete(id);
+    const fileName = plot?.imagePath.replace("public/images/", "");
+    deleteFile(fileName).catch(next);
     res.status(204).json({
       status: "success",
     });

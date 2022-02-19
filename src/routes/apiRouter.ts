@@ -2,9 +2,9 @@ import express from "express";
 import {
   addImagePaths,
   addPlot,
+  deleteImageByName,
   deletePlotById,
   getPlotById,
-  getPlotGallery,
   getPlots,
   uploadPhotoHandler,
 } from "../controller/apiController";
@@ -18,7 +18,14 @@ apiRouter
   .post(uploadPhotoHandler, addImagePaths, catchAsyncErrors(addPlot));
 
 apiRouter
+  .route("/plots/images/:fileName")
+  .delete(catchAsyncErrors(deleteImageByName));
+
+apiRouter
   .route("/plots/:id")
   .get(catchAsyncErrors(getPlotById))
-  .delete(catchAsyncErrors(deletePlotById));
+  .delete(
+    catchAsyncErrors(deletePlotById),
+    catchAsyncErrors(deleteImageByName)
+  );
 export default apiRouter;
