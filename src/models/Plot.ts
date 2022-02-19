@@ -1,8 +1,10 @@
 import { model, Schema } from "mongoose";
-interface IPlot {
+export interface IPlot {
   title: string;
   landmark: string;
   description: string;
+  imagePath: string;
+  thumbnailPath: string;
 }
 const PlotSchema = new Schema({
   title: {
@@ -17,6 +19,8 @@ const PlotSchema = new Schema({
     type: String,
     required: true,
   },
+  imagePath: { type: String },
+  thumbnailPath: { type: String },
 });
 
 const Plots = model<IPlot>("Plots", PlotSchema);
