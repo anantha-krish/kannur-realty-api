@@ -6,6 +6,7 @@ import {
   deletePlotById,
   getPlotById,
   getPlots,
+  updatePlotDetails,
   uploadPhotoHandler,
 } from "../controller/apiController";
 import { catchAsyncErrors } from "../utils";
@@ -24,8 +25,10 @@ apiRouter
 apiRouter
   .route("/plots/:id")
   .get(catchAsyncErrors(getPlotById))
-  .delete(
-    catchAsyncErrors(deletePlotById),
-    catchAsyncErrors(deleteImageByName)
+  .delete(catchAsyncErrors(deletePlotById), catchAsyncErrors(deleteImageByName))
+  .patch(
+    uploadPhotoHandler,
+    addImagePaths,
+    catchAsyncErrors(updatePlotDetails)
   );
 export default apiRouter;

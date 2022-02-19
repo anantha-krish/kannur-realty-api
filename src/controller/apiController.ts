@@ -82,6 +82,32 @@ export const addPlot: IApiController = async (req, res) => {
   res.status(201).json(response);
 };
 
+export const updatePlotDetails: IApiController = async (req, res, next) => {
+  const id = req.params.id.toString();
+  const isValidId = mongoose.isValidObjectId(id);
+  let oldPlot;
+  if (isValidId) oldPlot = await Plots.findById(id);
+  if (!oldPlot) {
+    res.status(404).json({ message: "Plot does not exist with this Id" });
+    return next();
+  }
+
+  const updatedPlot = await Plots.findByIdAndUpdate(id, req.body, {
+    new: true,
+  });
+  const response: IApiResponse = {
+    status: "success",
+    result: updatedPlot,
+  };
+  if (updatedPlot.imagePath !== oldPlot.imagePath) {
+    //cleanup task if image was updated
+    const fileName = oldPlot?.imagePath.replace("public/images/", "");
+    deleteFile(fileName);
+  }
+  //send response
+  res.status(200).json(response);
+};
+
 const deleteFile = async (fileName: string) => {
   const folder = "../../public/";
   //remove original
